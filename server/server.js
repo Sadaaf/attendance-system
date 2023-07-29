@@ -1,6 +1,7 @@
 const express = require("express");
 const connectDB = require("./db");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const app = express();
 const User = require("./models/User");
 
@@ -25,10 +26,31 @@ app.post("/login", async (req, res, next) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid Credentials" });
     }
-    delete user._doc.password
-    return res.status(200).json({ message: "Login Successful", user });
+    delete user._doc.password;
+
+    const token = jwt.sign(user._doc, "secret-key", { expiresIn: "2h" });
+
+    return res.status(200).json({ message: "Login Successful", token });
   } catch (err) {
     next(err);
+  }
+});
+
+app.get("/private", async (req, res) => {
+  let token = req.headers.authorization;
+  if (!req.headers.authorization) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  token = token.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, "secret-key");
+    const user = await User.findById(decoded._id);
+    if (!user) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+    return res.status(200).json({ message: "I am a private Route" });
+  } catch (e) {
+    return res.status(400).json({ message: "Invalid token" });
   }
 });
 
