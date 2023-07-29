@@ -24,7 +24,8 @@ app.get("/private", authenticate, async (req, res) => {
 
 
 app.use((err, req, res, next) => {
-  res.status(500).json({ message: "Server error occurred" });
+  const message = err.message ? err.message : "Server error occurred"
+  res.status(err.status ? err.status : 500).json({ message });
   console.log(err);
 });
 
