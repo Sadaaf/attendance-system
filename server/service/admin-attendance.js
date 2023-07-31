@@ -9,6 +9,10 @@ const createAdminAttendance = async () => {
   return attendance.save();
 };
 
+const getAdminAttendanceById = (id) => {
+  return AdminAttendance.findById(id)
+}
+
 const getRunningAttendance = () => {
   return AdminAttendance.findOne({ status: "RUNNING" });
 };
@@ -16,4 +20,5 @@ const getRunningAttendance = () => {
 module.exports = {
   createAdminAttendance,
   getRunningAttendance,
+  getAdminAttendanceById,
 };
